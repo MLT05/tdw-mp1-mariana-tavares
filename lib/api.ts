@@ -20,27 +20,32 @@ const POST_GRAPHQL_FIELDS = `
 `;
 
 async function fetchGraphQL(query: string, preview = false): Promise<any> {
-  const spaceId = process.env.CONTENTFUL_SPACE_ID;
+  const spaceId =
+    process.env.CONTENTFUL_SPACE_ID ||
+    process.env.NEXT_PUBLIC_CONTENTFUL_SPACE_ID;
+
   const token = preview
-    ? process.env.CONTENTFUL_PREVIEW_ACCESS_TOKEN
-    : process.env.CONTENTFUL_ACCESS_TOKEN;
+    ? process.env.CONTENTFUL_PREVIEW_ACCESS_TOKEN ||
+      process.env.NEXT_PUBLIC_CONTENTFUL_PREVIEW_ACCESS_TOKEN
+    : process.env.CONTENTFUL_ACCESS_TOKEN ||
+      process.env.NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN;
 
   // Interrompe imediatamente se faltar alguma variável crítica
   if (!spaceId || !token) {
     throw new Error(
       `❌ [Contentful API Error]: Faltam as variáveis de ambiente necessárias (${
-        !spaceId ? "CONTENTFUL_SPACE_ID " : ""
-      }${!token ? "CONTENTFUL_ACCESS_TOKEN/PREVIEW" : ""}). Confirma a configuração no GitLab CI/CD Variables.`,
+        !spaceId ? "SPACE_ID " : ""
+      }${!token ? "ACCESS_TOKEN/PREVIEW" : ""}). Confirma a configuração no GitLab CI/CD Variables.`,
     );
   }
 
   const response = await fetch(
-    `https://graphql.contentful.com/content/v1/spaces/${spaceId}`,
+    `https://graphql.contentful.com/content/v1/spaces/${spaceId.trim()}`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token.trim()}`,
       },
       body: JSON.stringify({ query }),
       next: { tags: ["posts"] },
