@@ -10,7 +10,7 @@
     "format:check": "prettier --check .",
     "build:cf": "opennextjs-cloudflare build",
     "preview:cf": "opennextjs-cloudflare preview",
-    "deploy:cf": "opennextjs-cloudflare deploy",
+    "deploy:cf": "wrangler pages deploy .open-next --project-name=tdw-mp1-mariana-tavares",
     "test": "vitest",
     "prepare": "husky install"
   },
