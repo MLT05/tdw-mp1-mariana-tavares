@@ -1,0 +1,61 @@
+
+stages:
+  - quality
+  - test
+  - build
+  - deploy
+
+image: node:22
+
+variables:
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - .npm/
+
+lint:
+  stage: quality
+  script:
+    - npm ci
+    - npm run lint
+
+format:
+  stage: quality
+  script:
+    - npm ci
+    - npx prettier --check .github/workflows/ci.yml tests/HelloWorld.jsx tests/HelloWorld.test.jsx tests/helpers.js tests/helpers.test.js vitest.config.js
+
+test:
+  stage: test
+  script:
+    - npm ci
+    - npm test -- --run
+
+build:
+  stage: build
+  needs:
+    - lint
+    - format
+    - test
+  script:
+    - npm ci
+    - npm run build:cf
+  artifacts:
+    paths:
+      - .open-next/
+    expire_in: 1 day
+
+deploy:
+  stage: deploy
+  needs:
+    - job: build
+      artifacts: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+  script:
+    - npm ci
+    - npx opennextjs-cloudflare deploy

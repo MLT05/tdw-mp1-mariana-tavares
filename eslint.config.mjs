@@ -14,7 +14,16 @@ const compat = new FlatCompat({
 const eslintConfig = defineConfig([
   ...compat.extends("next/core-web-vitals"),
   eslintConfigPrettier,
-  globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts"]),
+ globalIgnores([
+  ".next/**",
+  ".open-next/**",
+  ".wrangler/**",
+  "out/**",
+  "build/**",
+  ".lighthouseci/**",
+  "lhci_reports/**",
+  "next-env.d.ts",
+]),
 ]);
 
 export default eslintConfig;
