@@ -135,7 +135,7 @@ jobs:
       - name: Deploy Preview to Cloudflare
         id: preview_deploy
         run: |
-          npx wrangler pages deploy .open-next/ --project-name="tdw-mp1-mariana-tavares" --branch="pr-${{ github.event.number }}"
+         npx wrangler pages deploy .open-next/ --project-name="O_NOME_EXATO_AQUI" --branch="pr-${{ github.event.number }}"
       - name: Post Preview Link on PR
         uses: actions/github-script@v7
         with:
