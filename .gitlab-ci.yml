@@ -1,4 +1,3 @@
-
 stages:
   - quality
   - test
@@ -55,7 +54,7 @@ deploy:
     - job: build
       artifacts: true
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
   script:
     - npm ci
     - npx opennextjs-cloudflare deploy
