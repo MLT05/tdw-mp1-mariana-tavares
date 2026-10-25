@@ -60,7 +60,7 @@ deploy:
       artifacts: true
   rules:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
-    - if: '$CI_PIPELINE_SOURCE == "pipeline"'
+    - if: '$CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger"'
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   variables:
     CONTENTFUL_SPACE_ID: "$CONTENTFUL_SPACE_ID"
