@@ -1,0 +1,13 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🔍 A verificar a formatação e linting antes do commit..."
+
+# 1. Corre o Prettier para formatar automaticamente
+npx prettier --write .
+
+# 2. Corre o ESLint para garantir que não há erros de sintaxe
+npm run lint
+
+# 3. Re-adiciona os ficheiros formatados ao stage do Git
+git add .
