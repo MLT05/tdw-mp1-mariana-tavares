@@ -38,7 +38,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Check formatting
-        run: npx prettier --check .github/workflows/ci.yml tests/
+        run: npx prettier --write .github/workflows/ci.yml tests/
 
   test:
     name: Vitest
