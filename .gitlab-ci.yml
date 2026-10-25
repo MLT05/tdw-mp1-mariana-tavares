@@ -69,6 +69,18 @@ deploy:
     NEXT_PUBLIC_CONTENTFUL_SPACE_ID: "$NEXT_PUBLIC_CONTENTFUL_SPACE_ID"
     NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN: "$NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN"
   script:
+    - |
+      if [ "$CLOUDFLARE_ACCOUNT_ID" = '$CLOUDFLARE_ACCOUNT_ID' ]; then
+        echo "ERRO: CLOUDFLARE_ACCOUNT_ID contém o texto literal da variável."
+        exit 1
+      fi
+
+      if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+        echo "ERRO: CLOUDFLARE_ACCOUNT_ID não está definida."
+        exit 1
+      fi
+
+      echo "CLOUDFLARE_ACCOUNT_ID está definida."
     - npm run deploy:cf
 
 preview:
@@ -84,4 +96,16 @@ preview:
     NEXT_PUBLIC_CONTENTFUL_SPACE_ID: "$NEXT_PUBLIC_CONTENTFUL_SPACE_ID"
     NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN: "$NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN"
   script:
+    - |
+      if [ "$CLOUDFLARE_ACCOUNT_ID" = '$CLOUDFLARE_ACCOUNT_ID' ]; then
+        echo "ERRO: CLOUDFLARE_ACCOUNT_ID contém o texto literal da variável."
+        exit 1
+      fi
+
+      if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+        echo "ERRO: CLOUDFLARE_ACCOUNT_ID não está definida."
+        exit 1
+      fi
+
+      echo "CLOUDFLARE_ACCOUNT_ID está definida."
     - npx wrangler pages deploy .open-next/ --project-name="tdw-mp1-mariana-tavares" --branch="mr-$CI_MERGE_REQUEST_IID"
