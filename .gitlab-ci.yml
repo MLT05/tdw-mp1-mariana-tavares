@@ -3,6 +3,7 @@ stages:
   - test
   - build
   - deploy
+  - audit
 
 image: node:22
 
@@ -40,10 +41,6 @@ build:
     - lint
     - format
     - test
-  variables:
-    NEXT_PUBLIC_CONTENTFUL_SPACE_ID: "$NEXT_PUBLIC_CONTENTFUL_SPACE_ID"
-    NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN: "$NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN"
-    NEXT_PUBLIC_CONTENTFUL_PREVIEW_ACCESS_TOKEN: "$NEXT_PUBLIC_CONTENTFUL_PREVIEW_ACCESS_TOKEN"
   script:
     - npm run build:cf
   artifacts:
@@ -60,11 +57,6 @@ deploy:
     - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH"
     - if: '$CI_PIPELINE_SOURCE == "pipeline" || $CI_PIPELINE_SOURCE == "trigger"'
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
-  variables:
-    NEXT_PUBLIC_CONTENTFUL_SPACE_ID: "$NEXT_PUBLIC_CONTENTFUL_SPACE_ID"
-    NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN: "$NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN"
-    CLOUDFLARE_API_TOKEN: "$CLOUDFLARE_API_TOKEN"
-    CLOUDFLARE_ACCOUNT_ID: "$CLOUDFLARE_ACCOUNT_ID"
   script:
     - npm run deploy:cf
 
@@ -75,10 +67,30 @@ preview:
       artifacts: true
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  variables:
-    NEXT_PUBLIC_CONTENTFUL_SPACE_ID: "$NEXT_PUBLIC_CONTENTFUL_SPACE_ID"
-    NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN: "$NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN"
-    CLOUDFLARE_API_TOKEN: "$CLOUDFLARE_API_TOKEN"
-    CLOUDFLARE_ACCOUNT_ID: "$CLOUDFLARE_ACCOUNT_ID"
   script:
-    - npx wrangler pages deploy .open-next/ --project-name="tdw-mp1-mariana-tavares" --branch="mr-$CI_MERGE_REQUEST_IID"
+    # Captura o URL de preview retornado pelo Wrangler e guarda num ficheiro .env
+    - npx wrangler pages deploy .open-next/ --project-name="tdw-mp1-mariana-tavares" --branch="mr-$CI_MERGE_REQUEST_IID" > wrangler_output.txt
+    - cat wrangler_output.txt
+    - PREVIEW_URL=$(grep -oE 'https://[a-zA-Z0-9.-]+\.pages\.dev' wrangler_output.txt | head -n 1)
+    - echo "PREVIEW_URL=$PREVIEW_URL" >> preview.env
+  artifacts:
+    reports:
+      dotenv: preview.env
+
+lighthouse:
+  stage: audit
+  needs:
+    - job: preview
+      artifacts: true
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  before_script:
+    - npm install -g @lhci/cli@0.14.x
+    - apt-get update && apt-get install -y chromium
+  script:
+    # Corre a auditoria no URL de preview dinâmico
+    - lhci collect --url="$PREVIEW_URL"
+    # Faz o upload e envia os comentários/pontuação para o Merge Request
+    - lhci upload
+  variables:
+    CHROME_PATH: "/usr/bin/chromium"
