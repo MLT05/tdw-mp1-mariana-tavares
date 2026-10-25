@@ -20,22 +20,40 @@ const POST_GRAPHQL_FIELDS = `
 `;
 
 async function fetchGraphQL(query: string, preview = false): Promise<any> {
-  return fetch(
-    `https://graphql.contentful.com/content/v1/spaces/${process.env.CONTENTFUL_SPACE_ID}`,
+  const spaceId = process.env.CONTENTFUL_SPACE_ID;
+  const token = preview
+    ? process.env.CONTENTFUL_PREVIEW_ACCESS_TOKEN
+    : process.env.CONTENTFUL_ACCESS_TOKEN;
+
+  if (!spaceId || !token) {
+    console.error(
+      "❌ [Contentful API] Erro: Faltam as variáveis de ambiente CONTENTFUL_SPACE_ID ou CONTENTFUL_ACCESS_TOKEN.",
+    );
+  }
+
+  const response = await fetch(
+    `https://graphql.contentful.com/content/v1/spaces/${spaceId}`,
     {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${
-          preview
-            ? process.env.CONTENTFUL_PREVIEW_ACCESS_TOKEN
-            : process.env.CONTENTFUL_ACCESS_TOKEN
-        }`,
+        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ query }),
       next: { tags: ["posts"] },
     },
-  ).then((response) => response.json());
+  );
+
+  // Se a API responder com erro (ex: 401 Unauthorized por falta de token)
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error(`❌ [Contentful API Error ${response.status}]:`, errorText);
+    throw new Error(
+      `Falha na requisição GraphQL (${response.status} ${response.statusText}). Confirma se as variáveis do Contentful estão configuradas no GitLab CI/CD Variables.`,
+    );
+  }
+
+  return response.json();
 }
 
 function extractPost(fetchResponse: any): any {
