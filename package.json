@@ -1,24 +1,24 @@
+
 {
   "private": true,
   "scripts": {
-    "lint": "eslint .",
-    "dev": "next",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "setup": "node --env-file-if-exists=.env.local ./lib/setup.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "build:cf": "opennextjs-cloudflare build",
     "preview:cf": "opennextjs-cloudflare preview",
     "deploy:cf": "opennextjs-cloudflare deploy",
-    "test": "vitest",
-    "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "test": "vitest"
   },
   "dependencies": {
     "@contentful/rich-text-react-renderer": "^15.17.1",
     "@contentful/rich-text-types": "^16.2.1",
     "@contentful/vercel-nextjs-toolkit": "latest",
     "@tailwindcss/typography": "0.5.9",
-    "@types/node": "^20.5.0",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "autoprefixer": "10.4.15",
@@ -32,6 +32,7 @@
     "typescript": "^5.1.6"
   },
   "devDependencies": {
+    "@types/node": "^22.20.5",
     "@lhci/cli": "^0.15.1",
     "@opennextjs/cloudflare": "^1.20.13",
     "@testing-library/dom": "^10.4.2",
