@@ -2,14 +2,17 @@ name: CI/CD Pipeline
 
 on:
   push:
+    branches: ["**"]
   pull_request:
   repository_dispatch:
     types: [contentful-update]
   schedule:
+    # Ativo temporariamente para demonstrar o gatilho de cron (desativar após teste)
     - cron: "0 0 * * *"
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
   lint:
@@ -35,7 +38,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Check formatting
-        run: npx prettier --check .github/workflows/ci.yml tests/HelloWorld.jsx tests/HelloWorld.test.jsx tests/helpers.js tests/helpers.test.js vitest.config.js
+        run: npx prettier --check .github/workflows/ci.yml tests/
 
   test:
     name: Vitest
@@ -53,6 +56,8 @@ jobs:
     name: Cloudflare Build
     runs-on: ubuntu-latest
     needs: [lint, format, test]
+    # Compila apenas na branch principal ou em Pull Requests/Webhooks
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' || github.event_name == 'repository_dispatch'
     env:
       CONTENTFUL_SPACE_ID: ${{ secrets.CONTENTFUL_SPACE_ID }}
       CONTENTFUL_ACCESS_TOKEN: ${{ secrets.CONTENTFUL_ACCESS_TOKEN }}
@@ -75,9 +80,10 @@ jobs:
           if-no-files-found: error
 
   deploy:
-    name: Deploy to Cloudflare
+    name: Deploy to Production (Cloudflare)
     runs-on: ubuntu-latest
-    needs: [lint, format, test, build]
+    needs: [build]
+    # O deploy final de Produção SÓ corre na branch main
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     env:
       CONTENTFUL_SPACE_ID: ${{ secrets.CONTENTFUL_SPACE_ID }}
@@ -99,3 +105,31 @@ jobs:
           path: .open-next/
       - name: Deploy to Cloudflare
         run: npm run deploy:cf
+
+  preview:
+    name: Preview Deployment
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: github.event_name == 'pull_request'
+    env:
+      CONTENTFUL_SPACE_ID: ${{ secrets.CONTENTFUL_SPACE_ID }}
+      CONTENTFUL_ACCESS_TOKEN: ${{ secrets.CONTENTFUL_ACCESS_TOKEN }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Download Cloudflare build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: cloudflare-build
+          path: .open-next/
+      - name: Deploy Preview to Cloudflare
+        id: preview_deploy
+        run: |
+          # Gera um alias para o preview baseado no número da PR
+          npx wrangler pages deploy .open-next/ --branch="pr-${{ github.event.number }}"
