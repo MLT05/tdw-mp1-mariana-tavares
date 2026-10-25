@@ -112,6 +112,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     if: github.event_name == 'pull_request'
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       CONTENTFUL_SPACE_ID: ${{ secrets.CONTENTFUL_SPACE_ID }}
       CONTENTFUL_ACCESS_TOKEN: ${{ secrets.CONTENTFUL_ACCESS_TOKEN }}
@@ -132,8 +135,7 @@ jobs:
       - name: Deploy Preview to Cloudflare
         id: preview_deploy
         run: |
-          # Gera um alias para o preview baseado no número da PR
-          npx wrangler pages deploy .open-next/ --branch="pr-${{ github.event.number }}"
+          npx wrangler pages deploy .open-next/ --project-name="tdw-mp1-mariana-tavares" --branch="pr-${{ github.event.number }}"
       - name: Post Preview Link on PR
         uses: actions/github-script@v7
         with:
@@ -142,5 +144,6 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: "🚀 **Preview Deployment pronta na Cloudflare:**\nhttps://pr-${{ github.event.number }}.tdw-mp1-mariana-lopes.workers.dev"
+              body: "🚀 **Preview Deployment pronta na Cloudflare:**\nhttps://pr-${{ github.event.number }}.tdw-mp1-mariana-tavares.workers.dev"
             });
+            
