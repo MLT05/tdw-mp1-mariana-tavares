@@ -16,7 +16,6 @@ cache:
   paths:
     - .npm/
 
-# Prepara a cache antes de cada job
 before_script:
   - npm ci
 
@@ -28,7 +27,7 @@ lint:
 format:
   stage: quality
   script:
-    - npx prettier --check .github/workflows/ci.yml tests/HelloWorld.jsx tests/HelloWorld.test.jsx tests/helpers.js tests/helpers.test.js vitest.config.js
+    - npx prettier --check .
 
 test:
   stage: test
@@ -52,7 +51,6 @@ build:
       - .open-next/
     expire_in: 1 day
 
-# Deploy de Produção (Apenas na Branch Principal, Webhooks do CMS ou Cron)
 deploy:
   stage: deploy
   needs:
@@ -68,9 +66,8 @@ deploy:
     CLOUDFLARE_API_TOKEN: "$CLOUDFLARE_API_TOKEN"
     CLOUDFLARE_ACCOUNT_ID: "$CLOUDFLARE_ACCOUNT_ID"
   script:
-    - npx opennextjs-cloudflare deploy
+    - npm run deploy:cf
 
-# Preview Deployment para Merge Requests
 preview:
   stage: deploy
   needs:
@@ -84,4 +81,4 @@ preview:
     CLOUDFLARE_API_TOKEN: "$CLOUDFLARE_API_TOKEN"
     CLOUDFLARE_ACCOUNT_ID: "$CLOUDFLARE_ACCOUNT_ID"
   script:
-    - npx wrangler pages deploy .open-next/ --branch="mr-$CI_MERGE_REQUEST_IID"
+    - npx wrangler pages deploy .open-next/ --project-name="tdw-mp1-mariana-tavares" --branch="mr-$CI_MERGE_REQUEST_IID"
