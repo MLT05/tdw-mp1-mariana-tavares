@@ -7,7 +7,6 @@ on:
   repository_dispatch:
     types: [contentful-update]
   schedule:
-    # Ativo temporariamente para demonstrar o gatilho de cron
     - cron: "0 0 * * *"
 
 permissions:
@@ -56,7 +55,6 @@ jobs:
     name: Cloudflare Build
     runs-on: ubuntu-latest
     needs: [lint, format, test]
-    # Compila apenas na branch principal ou em Pull Requests/Webhooks
     if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request' || github.event_name == 'repository_dispatch'
     env:
       CONTENTFUL_SPACE_ID: ${{ secrets.CONTENTFUL_SPACE_ID }}
@@ -84,7 +82,6 @@ jobs:
     name: Deploy to Production (Cloudflare)
     runs-on: ubuntu-latest
     needs: [build]
-    # O deploy final de Produção SÓ corre na branch main
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     env:
       CONTENTFUL_SPACE_ID: ${{ secrets.CONTENTFUL_SPACE_ID }}
