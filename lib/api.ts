@@ -25,9 +25,12 @@ async function fetchGraphQL(query: string, preview = false): Promise<any> {
     ? process.env.CONTENTFUL_PREVIEW_ACCESS_TOKEN
     : process.env.CONTENTFUL_ACCESS_TOKEN;
 
+  // Interrompe imediatamente se faltar alguma variável crítica
   if (!spaceId || !token) {
-    console.error(
-      "❌ [Contentful API] Erro: Faltam as variáveis de ambiente CONTENTFUL_SPACE_ID ou CONTENTFUL_ACCESS_TOKEN.",
+    throw new Error(
+      `❌ [Contentful API Error]: Faltam as variáveis de ambiente necessárias (${
+        !spaceId ? "CONTENTFUL_SPACE_ID " : ""
+      }${!token ? "CONTENTFUL_ACCESS_TOKEN/PREVIEW" : ""}). Confirma a configuração no GitLab CI/CD Variables.`,
     );
   }
 
@@ -44,12 +47,11 @@ async function fetchGraphQL(query: string, preview = false): Promise<any> {
     },
   );
 
-  // Se o servidor devolver um código de erro (ex: 401, 404, 500)
   if (!response.ok) {
     const errorText = await response.text();
     console.error(`❌ [Contentful API Error ${response.status}]:`, errorText);
     throw new Error(
-      `Falha na requisição GraphQL (${response.status} ${response.statusText}). Verifica se os tokens do Contentful estão definidos no GitLab CI/CD Variables.`,
+      `Falha na requisição GraphQL do Contentful (${response.status} ${response.statusText}).`,
     );
   }
 
