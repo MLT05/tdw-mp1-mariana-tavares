@@ -39,3 +39,11 @@ contentful-import-error-log-*.json
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Cloudflare OpenNext build
+/.open-next/
+/.wrangler/
+
+# Lighthouse reports
+/.lighthouseci/
+/lhci_reports/

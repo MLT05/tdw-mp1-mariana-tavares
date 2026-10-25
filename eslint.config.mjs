@@ -1,16 +1,27 @@
 import { defineConfig, globalIgnores } from "eslint/config";
-import nextVitals from "eslint-config-next/core-web-vitals";
-import prettier from "eslint-config-prettier/flat";
+import { FlatCompat } from "@eslint/eslintrc";
+import eslintConfigPrettier from "eslint-config-prettier";
+import { dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
 
 const eslintConfig = defineConfig([
-  ...nextVitals,
-  prettier,
-  // Override default ignores of eslint-config-next.
+  ...compat.extends("next/core-web-vitals"),
+  eslintConfigPrettier,
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
+    ".open-next/**",
+    ".wrangler/**",
     "out/**",
     "build/**",
+    ".lighthouseci/**",
+    "lhci_reports/**",
     "next-env.d.ts",
   ]),
 ]);
