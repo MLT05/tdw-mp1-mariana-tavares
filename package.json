@@ -11,7 +11,8 @@
     "build:cf": "opennextjs-cloudflare build",
     "preview:cf": "opennextjs-cloudflare preview",
     "deploy:cf": "opennextjs-cloudflare deploy",
-    "test": "vitest"
+    "test": "vitest",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@contentful/rich-text-react-renderer": "^15.17.1",
@@ -43,6 +44,7 @@
     "jsdom": "^29.1.1",
     "prettier": "^3.9.10",
     "vitest": "^3.2.7",
-    "wrangler": "^4.152.0"
+    "wrangler": "^4.152.0",
+    "husky": "^8.0.0"
   }
 }
