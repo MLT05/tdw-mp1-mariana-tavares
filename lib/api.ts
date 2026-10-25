@@ -38,6 +38,17 @@ async function fetchGraphQL(query: string, preview = false): Promise<any> {
       }${!token ? "ACCESS_TOKEN/PREVIEW" : ""}). Confirma a configuração no GitLab CI/CD Variables.`,
     );
   }
+  console.log("[Contentful Debug]", {
+    spaceId,
+    tokenSource: preview
+      ? process.env.CONTENTFUL_PREVIEW_ACCESS_TOKEN
+        ? "CONTENTFUL_PREVIEW_ACCESS_TOKEN"
+        : "NEXT_PUBLIC_CONTENTFUL_PREVIEW_ACCESS_TOKEN"
+      : process.env.CONTENTFUL_ACCESS_TOKEN
+        ? "CONTENTFUL_ACCESS_TOKEN"
+        : "NEXT_PUBLIC_CONTENTFUL_ACCESS_TOKEN",
+    endpoint: `https://graphql.contentful.com/content/v1/spaces/${spaceId.trim()}`,
+  });
 
   const response = await fetch(
     `https://graphql.contentful.com/content/v1/spaces/${spaceId.trim()}`,
