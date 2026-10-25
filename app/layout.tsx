@@ -14,6 +14,8 @@ const inter = Inter({
 });
 
 function Footer() {
+  const commitSha = process.env.NEXT_PUBLIC_SHA?.slice(0, 7) ?? "local";
+
   return (
     <footer className="bg-accent-1 border-t border-accent-2">
       <div className="container mx-auto px-5">
@@ -35,6 +37,10 @@ function Footer() {
               Ver exemplo no GitHub
             </a>
           </div>
+        </div>
+        {/* Bónus de Rastreabilidade (P04) - Commit SHA */}
+        <div className="py-6 border-t border-accent-2 text-center text-xs text-gray-500 font-mono">
+          built from commit: {commitSha}
         </div>
       </div>
     </footer>
